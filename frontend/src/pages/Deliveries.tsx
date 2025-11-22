@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import DeliveryList from '@/components/deliveries/DeliveryList';
 import DeliveryForm from '@/components/deliveries/DeliveryForm';
@@ -11,6 +12,7 @@ import { Delivery } from '@/types';
 import { toast } from 'sonner';
 
 const Deliveries = () => {
+  const navigate = useNavigate();
   const [formOpen, setFormOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -45,6 +47,10 @@ const Deliveries = () => {
   const handleCancel = (id: string) => {
     updateDelivery(id, { status: 'canceled' });
     toast.success('Delivery canceled');
+  };
+
+  const handleOptimize = (id: string) => {
+    navigate(`/optimization?type=delivery&id=${id}`);
   };
 
   const handleClose = () => {
@@ -96,6 +102,7 @@ const Deliveries = () => {
             onPack={handlePack}
             onConfirm={handleConfirm}
             onCancel={handleCancel}
+            onOptimize={handleOptimize}
           />
         </div>
 

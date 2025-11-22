@@ -2,7 +2,7 @@ import { useInventory } from '@/context/InventoryContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, CheckCircle2, XCircle, Eye, ArrowRightLeft } from 'lucide-react';
+import { Edit, CheckCircle2, XCircle, Eye, ArrowRightLeft, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 import { Transfer } from '@/types';
 import { format } from 'date-fns';
@@ -12,9 +12,10 @@ interface TransferListProps {
   onView: (id: string) => void;
   onConfirm: (id: string) => void;
   onCancel: (id: string) => void;
+  onOptimize?: (id: string) => void;
 }
 
-const TransferList = ({ onEdit, onView, onConfirm, onCancel }: TransferListProps) => {
+const TransferList = ({ onEdit, onView, onConfirm, onCancel, onOptimize }: TransferListProps) => {
   const { transfers, warehouses, filters } = useInventory();
 
   const filteredTransfers = useMemo(() => {
@@ -114,6 +115,17 @@ const TransferList = ({ onEdit, onView, onConfirm, onCancel }: TransferListProps
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
+                  {onOptimize && transfer.status !== 'done' && transfer.status !== 'canceled' && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onOptimize(transfer.id)}
+                      className="hover:bg-purple-500 hover:text-white"
+                      title="Optimize Route"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                    </Button>
+                  )}
                   {transfer.status !== 'done' && transfer.status !== 'canceled' && (
                     <>
                       <Button

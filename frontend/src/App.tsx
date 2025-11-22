@@ -12,6 +12,7 @@ import Receipts from "./pages/Receipts";
 import Deliveries from "./pages/Deliveries";
 import Transfers from "./pages/Transfers";
 import Adjustments from "./pages/Adjustments";
+import SupplyChainOptimization from "./pages/SupplyChainOptimization";
 import Settings from "./pages/Settings";
 import MoveHistory from "./pages/MoveHistory";
 import NotFound from "./pages/NotFound";
@@ -78,6 +79,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Adjustments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/optimization"
+              element={
+                <ProtectedRoute>
+                  <SupplyChainOptimization />
                 </ProtectedRoute>
               }
             />

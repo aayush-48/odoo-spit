@@ -8,7 +8,8 @@ import {
   Settings, 
   ChevronDown,
   TrendingUp,
-  History
+  History,
+  Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -106,6 +107,17 @@ const Sidebar = () => {
                   >
                     <TrendingUp className="w-5 h-5" />
                     Adjustments
+                  </NavLink>
+                </li>
+                
+                <li>
+                  <NavLink
+                    to="/optimization"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
+                    activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Route Optimization
                   </NavLink>
                 </li>
                 

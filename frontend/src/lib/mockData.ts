@@ -1,4 +1,4 @@
-import { Product, Warehouse, Supplier } from '@/types';
+import { Product, Warehouse, Supplier, Receipt, Delivery, Transfer, Adjustment } from '@/types';
 
 export const initialWarehouses: Warehouse[] = [
   {
@@ -152,5 +152,262 @@ export const initialProducts: Product[] = [
     minStock: 10,
     createdAt: new Date('2024-02-15'),
     updatedAt: new Date('2024-02-15'),
+  },
+];
+
+export const initialReceipts: Receipt[] = [
+  {
+    id: 'rec1',
+    supplierId: 'sup1',
+    warehouseId: 'wh1',
+    status: 'draft',
+    lines: [
+      { productId: 'prod1', quantity: 100 },
+      { productId: 'prod3', quantity: 50 },
+    ],
+    notes: 'Initial stock receipt from Global Parts Co.',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-03-01'),
+  },
+  {
+    id: 'rec2',
+    supplierId: 'sup2',
+    warehouseId: 'wh2',
+    status: 'waiting',
+    lines: [
+      { productId: 'prod2', quantity: 5 },
+      { productId: 'prod5', quantity: 10 },
+    ],
+    notes: 'Waiting for quality inspection',
+    createdAt: new Date('2024-03-02'),
+    updatedAt: new Date('2024-03-02'),
+  },
+  {
+    id: 'rec3',
+    supplierId: 'sup3',
+    warehouseId: 'wh1',
+    status: 'ready',
+    lines: [
+      { productId: 'prod4', quantity: 75 },
+      { productId: 'prod7', quantity: 30 },
+    ],
+    notes: 'Ready for validation',
+    createdAt: new Date('2024-03-03'),
+    updatedAt: new Date('2024-03-03'),
+  },
+  {
+    id: 'rec4',
+    supplierId: 'sup1',
+    warehouseId: 'wh3',
+    status: 'done',
+    lines: [
+      { productId: 'prod6', quantity: 50 },
+      { productId: 'prod8', quantity: 20 },
+    ],
+    notes: 'Completed receipt',
+    createdAt: new Date('2024-02-28'),
+    updatedAt: new Date('2024-02-28'),
+  },
+];
+
+export const initialDeliveries: Delivery[] = [
+  {
+    id: 'del1',
+    warehouseId: 'wh1',
+    status: 'draft',
+    customerName: 'ABC Manufacturing',
+    lines: [
+      { productId: 'prod1', quantity: 50 },
+      { productId: 'prod3', quantity: 25 },
+    ],
+    notes: 'Pending customer confirmation',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-03-01'),
+  },
+  {
+    id: 'del2',
+    warehouseId: 'wh2',
+    status: 'waiting',
+    customerName: 'XYZ Industries',
+    lines: [
+      { productId: 'prod2', quantity: 3 },
+      { productId: 'prod5', quantity: 5 },
+    ],
+    notes: 'Items picked, waiting for packing',
+    createdAt: new Date('2024-03-02'),
+    updatedAt: new Date('2024-03-02'),
+  },
+  {
+    id: 'del3',
+    warehouseId: 'wh1',
+    status: 'ready',
+    customerName: 'Tech Solutions Inc.',
+    lines: [
+      { productId: 'prod4', quantity: 30 },
+      { productId: 'prod7', quantity: 15 },
+    ],
+    notes: 'Packed and ready for shipment',
+    createdAt: new Date('2024-03-03'),
+    updatedAt: new Date('2024-03-03'),
+  },
+  {
+    id: 'del4',
+    warehouseId: 'wh3',
+    status: 'done',
+    customerName: 'Global Industries',
+    lines: [
+      { productId: 'prod6', quantity: 20 },
+      { productId: 'prod8', quantity: 10 },
+    ],
+    notes: 'Delivered successfully',
+    createdAt: new Date('2024-02-28'),
+    updatedAt: new Date('2024-02-28'),
+  },
+];
+
+export const initialTransfers: Transfer[] = [
+  {
+    id: 'trf1',
+    fromWarehouseId: 'wh1',
+    toWarehouseId: 'wh2',
+    status: 'draft',
+    lines: [
+      { productId: 'prod1', quantity: 100 },
+      { productId: 'prod3', quantity: 30 },
+    ],
+    notes: 'Transfer to North Distribution Center',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-03-01'),
+  },
+  {
+    id: 'trf2',
+    fromWarehouseId: 'wh2',
+    toWarehouseId: 'wh3',
+    status: 'waiting',
+    lines: [
+      { productId: 'prod2', quantity: 2 },
+      { productId: 'prod5', quantity: 3 },
+    ],
+    notes: 'Waiting for transport',
+    createdAt: new Date('2024-03-02'),
+    updatedAt: new Date('2024-03-02'),
+  },
+  {
+    id: 'trf3',
+    fromWarehouseId: 'wh1',
+    toWarehouseId: 'wh3',
+    status: 'ready',
+    lines: [
+      { productId: 'prod4', quantity: 25 },
+      { productId: 'prod7', quantity: 20 },
+    ],
+    notes: 'Ready for transfer',
+    createdAt: new Date('2024-03-03'),
+    updatedAt: new Date('2024-03-03'),
+  },
+  {
+    id: 'trf4',
+    fromWarehouseId: 'wh3',
+    toWarehouseId: 'wh1',
+    status: 'done',
+    lines: [
+      { productId: 'prod6', quantity: 15 },
+      { productId: 'prod8', quantity: 8 },
+    ],
+    notes: 'Transfer completed',
+    createdAt: new Date('2024-02-28'),
+    updatedAt: new Date('2024-02-28'),
+  },
+];
+
+export const initialAdjustments: Adjustment[] = [
+  {
+    id: 'adj1',
+    warehouseId: 'wh1',
+    status: 'draft',
+    lines: [
+      {
+        productId: 'prod1',
+        countedQuantity: 520,
+        systemQuantity: 500,
+        difference: 20,
+        reason: 'Found extra units during count',
+      },
+      {
+        productId: 'prod3',
+        countedQuantity: 80,
+        systemQuantity: 85,
+        difference: -5,
+        reason: 'Damaged items found',
+      },
+    ],
+    notes: 'Monthly inventory count - Main Warehouse',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-03-01'),
+  },
+  {
+    id: 'adj2',
+    warehouseId: 'wh2',
+    status: 'waiting',
+    lines: [
+      {
+        productId: 'prod2',
+        countedQuantity: 10,
+        systemQuantity: 8,
+        difference: 2,
+        reason: 'Unrecorded receipt',
+      },
+      {
+        productId: 'prod5',
+        countedQuantity: 12,
+        systemQuantity: 10,
+        difference: 2,
+        reason: 'Stock found in wrong location',
+      },
+    ],
+    notes: 'Quarterly audit - North Distribution Center',
+    createdAt: new Date('2024-03-02'),
+    updatedAt: new Date('2024-03-02'),
+  },
+  {
+    id: 'adj3',
+    warehouseId: 'wh3',
+    status: 'ready',
+    lines: [
+      {
+        productId: 'prod4',
+        countedQuantity: 85,
+        systemQuantity: 80,
+        difference: 5,
+        reason: 'Physical count adjustment',
+      },
+      {
+        productId: 'prod7',
+        countedQuantity: 70,
+        systemQuantity: 75,
+        difference: -5,
+        reason: 'Expired items removed',
+      },
+    ],
+    notes: 'Ready for approval',
+    createdAt: new Date('2024-03-03'),
+    updatedAt: new Date('2024-03-03'),
+  },
+  {
+    id: 'adj4',
+    warehouseId: 'wh1',
+    status: 'done',
+    lines: [
+      {
+        productId: 'prod6',
+        countedQuantity: 225,
+        systemQuantity: 220,
+        difference: 5,
+        reason: 'Completed adjustment',
+      },
+    ],
+    notes: 'Adjustment completed and stock updated',
+    createdAt: new Date('2024-02-28'),
+    updatedAt: new Date('2024-02-28'),
   },
 ];
