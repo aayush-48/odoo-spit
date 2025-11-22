@@ -2,7 +2,7 @@ import { useInventory } from '@/context/InventoryContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, CheckCircle2, XCircle, Eye, Package, PackageCheck } from 'lucide-react';
+import { Edit, CheckCircle2, XCircle, Eye, Package, PackageCheck, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 import { Delivery } from '@/types';
 import { format } from 'date-fns';
@@ -14,9 +14,10 @@ interface DeliveryListProps {
   onPack: (id: string) => void;
   onConfirm: (id: string) => void;
   onCancel: (id: string) => void;
+  onOptimize?: (id: string) => void;
 }
 
-const DeliveryList = ({ onEdit, onView, onPick, onPack, onConfirm, onCancel }: DeliveryListProps) => {
+const DeliveryList = ({ onEdit, onView, onPick, onPack, onConfirm, onCancel, onOptimize }: DeliveryListProps) => {
   const { deliveries, warehouses, filters } = useInventory();
 
   const filteredDeliveries = useMemo(() => {
@@ -105,6 +106,17 @@ const DeliveryList = ({ onEdit, onView, onPick, onPack, onConfirm, onCancel }: D
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
+                  {onOptimize && delivery.status !== 'done' && delivery.status !== 'canceled' && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onOptimize(delivery.id)}
+                      className="hover:bg-purple-500 hover:text-white"
+                      title="Optimize Route"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                    </Button>
+                  )}
                   {delivery.status !== 'done' && delivery.status !== 'canceled' && (
                     <>
                       <Button

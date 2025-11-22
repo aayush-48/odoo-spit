@@ -23,7 +23,7 @@ import deliveryRoutes from "./routes/delivery.routes.js";
 import transferRoutes from "./routes/transfer.routes.js";
 import adjustmentRoutes from "./routes/stockAdjustment.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
-import ledgerRoutes from "./routes/ledger.routes.js";
+// import ledgerRoutes from "./routes/ledger.routes.js";
 
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -34,6 +34,6 @@ app.use("/api/deliveries", deliveryRoutes);
 app.use("/api/transfers", transferRoutes);
 app.use("/api/adjustments", adjustmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/ledger", ledgerRoutes);
+// app.use("/api/ledger", ledgerRoutes);
 
 export default app;

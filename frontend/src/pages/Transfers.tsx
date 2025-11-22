@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import TransferList from '@/components/transfers/TransferList';
 import TransferForm from '@/components/transfers/TransferForm';
@@ -11,6 +12,7 @@ import { Transfer } from '@/types';
 import { toast } from 'sonner';
 
 const Transfers = () => {
+  const navigate = useNavigate();
   const [formOpen, setFormOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -35,6 +37,10 @@ const Transfers = () => {
   const handleCancel = (id: string) => {
     updateTransfer(id, { status: 'canceled' });
     toast.success('Transfer canceled');
+  };
+
+  const handleOptimize = (id: string) => {
+    navigate(`/optimization?type=transfer&id=${id}`);
   };
 
   const handleClose = () => {
@@ -84,6 +90,7 @@ const Transfers = () => {
             onView={handleView}
             onConfirm={handleConfirm}
             onCancel={handleCancel}
+            onOptimize={handleOptimize}
           />
         </div>
 
