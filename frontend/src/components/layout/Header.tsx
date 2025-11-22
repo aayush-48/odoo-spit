@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings } from 'lucide-react';
+import { User, LogOut, Settings, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
@@ -41,10 +41,15 @@ const Header = () => {
           <DropdownMenuContent align="end" className="w-56 bg-popover">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+              <UserCircle className="w-4 h-4 mr-2" />
+              Profile
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
               <LogOut className="w-4 h-4 mr-2" />
               Logout

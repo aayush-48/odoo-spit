@@ -19,9 +19,10 @@ const ReceiptList = ({ onEdit, onView, onConfirm, onCancel }: ReceiptListProps) 
 
   const filteredReceipts = useMemo(() => {
     return receipts.filter(receipt => {
+      const supplierName = suppliers.find(s => s.id === receipt.supplierId)?.name || '';
       const matchesSearch = !filters.searchQuery || 
         receipt.id.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-        suppliers.find(s => s.id === receipt.supplierId)?.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
+        supplierName.toLowerCase().includes(filters.searchQuery.toLowerCase());
       
       const matchesStatus = filters.status === 'all' || receipt.status === filters.status;
       const matchesWarehouse = filters.warehouseId === 'all' || receipt.warehouseId === filters.warehouseId;

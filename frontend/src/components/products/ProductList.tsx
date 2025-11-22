@@ -21,7 +21,10 @@ const ProductList = ({ onEdit }: ProductListProps) => {
       
       const matchesCategory = filters.category === 'all' || product.category === filters.category;
       
-      return matchesSearch && matchesCategory;
+      const matchesWarehouse = filters.warehouseId === 'all' || 
+        (product.stock[filters.warehouseId] !== undefined && product.stock[filters.warehouseId] > 0);
+      
+      return matchesSearch && matchesCategory && matchesWarehouse;
     });
   }, [products, filters]);
 

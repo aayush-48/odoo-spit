@@ -15,6 +15,7 @@ import Adjustments from "./pages/Adjustments";
 import SupplyChainOptimization from "./pages/SupplyChainOptimization";
 import Settings from "./pages/Settings";
 import MoveHistory from "./pages/MoveHistory";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -103,6 +104,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

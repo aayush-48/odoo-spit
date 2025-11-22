@@ -2,9 +2,16 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInventory } from '@/context/InventoryContext';
 import { Search } from 'lucide-react';
+import { useMemo } from 'react';
 
 const FilterBar = () => {
-  const { filters, setFilters, warehouses } = useInventory();
+  const { filters, setFilters, warehouses, products } = useInventory();
+
+  // Dynamically extract unique categories from products
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(new Set(products.map(p => p.category))).sort();
+    return uniqueCategories;
+  }, [products]);
 
   return (
     <div className="flex flex-wrap gap-4 items-center bg-card p-4 rounded-lg border border-border">
@@ -19,7 +26,7 @@ const FilterBar = () => {
       </div>
 
       <Select
-        value={filters.documentType}
+        value={filters.documentType || 'all'}
         onValueChange={(value) => setFilters({ ...filters, documentType: value as any })}
       >
         <SelectTrigger className="w-[180px] bg-background">
@@ -35,7 +42,7 @@ const FilterBar = () => {
       </Select>
 
       <Select
-        value={filters.status}
+        value={filters.status || 'all'}
         onValueChange={(value) => setFilters({ ...filters, status: value as any })}
       >
         <SelectTrigger className="w-[180px] bg-background">
@@ -52,7 +59,7 @@ const FilterBar = () => {
       </Select>
 
       <Select
-        value={filters.warehouseId}
+        value={filters.warehouseId || 'all'}
         onValueChange={(value) => setFilters({ ...filters, warehouseId: value })}
       >
         <SelectTrigger className="w-[200px] bg-background">
@@ -69,7 +76,7 @@ const FilterBar = () => {
       </Select>
 
       <Select
-        value={filters.category}
+        value={filters.category || 'all'}
         onValueChange={(value) => setFilters({ ...filters, category: value })}
       >
         <SelectTrigger className="w-[180px] bg-background">
@@ -77,13 +84,11 @@ const FilterBar = () => {
         </SelectTrigger>
         <SelectContent className="bg-popover">
           <SelectItem value="all">All Categories</SelectItem>
-          <SelectItem value="Hardware">Hardware</SelectItem>
-          <SelectItem value="Machinery">Machinery</SelectItem>
-          <SelectItem value="Raw Materials">Raw Materials</SelectItem>
-          <SelectItem value="Safety Equipment">Safety Equipment</SelectItem>
-          <SelectItem value="Electrical">Electrical</SelectItem>
-          <SelectItem value="Chemicals">Chemicals</SelectItem>
-          <SelectItem value="Consumables">Consumables</SelectItem>
+          {categories.map((category) => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
