@@ -28,12 +28,16 @@ interface InventoryContextType {
   
   addDelivery: (delivery: Omit<Delivery, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateDelivery: (id: string, delivery: Partial<Delivery>) => void;
+  pickDelivery: (id: string) => void;
+  packDelivery: (id: string) => void;
   confirmDelivery: (id: string) => void;
   
   addTransfer: (transfer: Omit<Transfer, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateTransfer: (id: string, transfer: Partial<Transfer>) => void;
   confirmTransfer: (id: string) => void;
   
   addAdjustment: (adjustment: Omit<Adjustment, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateAdjustment: (id: string, adjustment: Partial<Adjustment>) => void;
   confirmAdjustment: (id: string) => void;
   
   login: (email: string, password: string) => Promise<boolean>;
@@ -142,6 +146,14 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     ));
   };
 
+  const pickDelivery = (id: string) => {
+    updateDelivery(id, { status: 'waiting' });
+  };
+
+  const packDelivery = (id: string) => {
+    updateDelivery(id, { status: 'ready' });
+  };
+
   const confirmDelivery = (id: string) => {
     const delivery = deliveries.find(d => d.id === id);
     if (!delivery) return;
@@ -176,18 +188,26 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     setTransfers([...transfers, newTransfer]);
   };
 
+  const updateTransfer = (id: string, transferData: Partial<Transfer>) => {
+    setTransfers(transfers.map(t => 
+      t.id === id ? { ...t, ...transferData, updatedAt: new Date() } : t
+    ));
+  };
+
   const confirmTransfer = (id: string) => {
     const transfer = transfers.find(t => t.id === id);
     if (!transfer) return;
 
+    // Update stock levels for each line
     setProducts(products.map(product => {
-      if (product.id === transfer.productId) {
+      const line = transfer.lines.find(l => l.productId === product.id);
+      if (line) {
         return {
           ...product,
           stock: {
             ...product.stock,
-            [transfer.fromWarehouseId]: Math.max(0, (product.stock[transfer.fromWarehouseId] || 0) - transfer.quantity),
-            [transfer.toWarehouseId]: (product.stock[transfer.toWarehouseId] || 0) + transfer.quantity,
+            [transfer.fromWarehouseId]: Math.max(0, (product.stock[transfer.fromWarehouseId] || 0) - line.quantity),
+            [transfer.toWarehouseId]: (product.stock[transfer.toWarehouseId] || 0) + line.quantity,
           },
           updatedAt: new Date(),
         };
@@ -195,9 +215,7 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
       return product;
     }));
 
-    setTransfers(transfers.map(t => 
-      t.id === id ? { ...t, status: 'done' as const, updatedAt: new Date() } : t
-    ));
+    updateTransfer(id, { status: 'done' });
   };
 
   // Adjustment actions
@@ -211,17 +229,25 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     setAdjustments([...adjustments, newAdjustment]);
   };
 
+  const updateAdjustment = (id: string, adjustmentData: Partial<Adjustment>) => {
+    setAdjustments(adjustments.map(a => 
+      a.id === id ? { ...a, ...adjustmentData, updatedAt: new Date() } : a
+    ));
+  };
+
   const confirmAdjustment = (id: string) => {
     const adjustment = adjustments.find(a => a.id === id);
     if (!adjustment) return;
 
+    // Update stock levels for each line
     setProducts(products.map(product => {
-      if (product.id === adjustment.productId) {
+      const line = adjustment.lines.find(l => l.productId === product.id);
+      if (line) {
         return {
           ...product,
           stock: {
             ...product.stock,
-            [adjustment.warehouseId]: adjustment.countedQuantity,
+            [adjustment.warehouseId]: line.countedQuantity,
           },
           updatedAt: new Date(),
         };
@@ -229,9 +255,7 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
       return product;
     }));
 
-    setAdjustments(adjustments.map(a => 
-      a.id === id ? { ...a, status: 'done' as const, updatedAt: new Date() } : a
-    ));
+    updateAdjustment(id, { status: 'done' });
   };
 
   // Auth actions
@@ -290,10 +314,14 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     confirmReceipt,
     addDelivery,
     updateDelivery,
+    pickDelivery,
+    packDelivery,
     confirmDelivery,
     addTransfer,
+    updateTransfer,
     confirmTransfer,
     addAdjustment,
+    updateAdjustment,
     confirmAdjustment,
     login,
     signup,

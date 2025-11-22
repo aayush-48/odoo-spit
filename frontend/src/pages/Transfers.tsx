@@ -1,21 +1,21 @@
 import { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import DeliveryList from '@/components/deliveries/DeliveryList';
-import DeliveryForm from '@/components/deliveries/DeliveryForm';
-import DeliveryDetails from '@/components/deliveries/DeliveryDetails';
+import TransferList from '@/components/transfers/TransferList';
+import TransferForm from '@/components/transfers/TransferForm';
+import TransferDetails from '@/components/transfers/TransferDetails';
 import FilterBar from '@/components/dashboard/FilterBar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useInventory } from '@/context/InventoryContext';
-import { Delivery } from '@/types';
+import { Transfer } from '@/types';
 import { toast } from 'sonner';
 
-const Deliveries = () => {
+const Transfers = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
-  const { deliveries, updateDelivery, pickDelivery, packDelivery, confirmDelivery } = useInventory();
+  const { transfers, updateTransfer, confirmTransfer } = useInventory();
 
   const handleEdit = (id: string) => {
     setEditingId(id);
@@ -27,24 +27,14 @@ const Deliveries = () => {
     setDetailsOpen(true);
   };
 
-  const handlePick = (id: string) => {
-    pickDelivery(id);
-    toast.success('Items marked as picked');
-  };
-
-  const handlePack = (id: string) => {
-    packDelivery(id);
-    toast.success('Items marked as packed');
-  };
-
   const handleConfirm = (id: string) => {
-    confirmDelivery(id);
-    toast.success('Delivery confirmed and stock decreased');
+    confirmTransfer(id);
+    toast.success('Transfer confirmed and stock moved');
   };
 
   const handleCancel = (id: string) => {
-    updateDelivery(id, { status: 'canceled' });
-    toast.success('Delivery canceled');
+    updateTransfer(id, { status: 'canceled' });
+    toast.success('Transfer canceled');
   };
 
   const handleClose = () => {
@@ -54,8 +44,8 @@ const Deliveries = () => {
     setViewingId(null);
   };
 
-  const editingDelivery = editingId ? deliveries.find(d => d.id === editingId) : null;
-  const viewingDelivery = viewingId ? deliveries.find(d => d.id === viewingId) : null;
+  const editingTransfer = editingId ? transfers.find(t => t.id === editingId) : null;
+  const viewingTransfer = viewingId ? transfers.find(t => t.id === viewingId) : null;
 
   return (
     <MainLayout>
@@ -63,10 +53,10 @@ const Deliveries = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-              Deliveries
+              Internal Transfers
             </h1>
             <p className="text-muted-foreground">
-              Manage outgoing shipments to customers
+              Transfer stock between warehouses and locations
             </p>
           </div>
           <Button
@@ -74,7 +64,7 @@ const Deliveries = () => {
             className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2"
           >
             <Plus className="w-4 h-4" />
-            New Delivery
+            New Transfer
           </Button>
         </div>
 
@@ -83,30 +73,28 @@ const Deliveries = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-display font-semibold text-foreground">
-              Deliveries List
+              Transfers List
             </h2>
             <span className="text-sm text-muted-foreground">
-              {deliveries.length} deliver{deliveries.length !== 1 ? 'ies' : 'y'}
+              {transfers.length} transfer{transfers.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <DeliveryList
+          <TransferList
             onEdit={handleEdit}
             onView={handleView}
-            onPick={handlePick}
-            onPack={handlePack}
             onConfirm={handleConfirm}
             onCancel={handleCancel}
           />
         </div>
 
-        <DeliveryForm
+        <TransferForm
           open={formOpen}
           onClose={handleClose}
-          editingDelivery={editingDelivery}
+          editingTransfer={editingTransfer}
         />
 
-        <DeliveryDetails
-          delivery={viewingDelivery}
+        <TransferDetails
+          transfer={viewingTransfer}
           open={detailsOpen}
           onClose={handleClose}
         />
@@ -115,4 +103,5 @@ const Deliveries = () => {
   );
 };
 
-export default Deliveries;
+export default Transfers;
+

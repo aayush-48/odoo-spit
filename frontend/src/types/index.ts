@@ -60,29 +60,38 @@ export interface Delivery {
   notes?: string;
 }
 
+export interface TransferLine {
+  productId: string;
+  quantity: number;
+}
+
 export interface Transfer {
   id: string;
-  productId: string;
   fromWarehouseId: string;
   toWarehouseId: string;
-  quantity: number;
+  lines: TransferLine[];
   status: DocumentStatus;
   createdAt: Date;
   updatedAt: Date;
   notes?: string;
 }
 
-export interface Adjustment {
-  id: string;
+export interface AdjustmentLine {
   productId: string;
-  warehouseId: string;
   countedQuantity: number;
   systemQuantity: number;
   difference: number;
   reason: string;
+}
+
+export interface Adjustment {
+  id: string;
+  warehouseId: string;
+  lines: AdjustmentLine[];
   status: DocumentStatus;
   createdAt: Date;
   updatedAt: Date;
+  notes?: string;
 }
 
 export interface User {

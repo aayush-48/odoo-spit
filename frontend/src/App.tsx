@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Receipts from "./pages/Receipts";
 import Deliveries from "./pages/Deliveries";
+import Transfers from "./pages/Transfers";
+import Adjustments from "./pages/Adjustments";
 import Settings from "./pages/Settings";
 import MoveHistory from "./pages/MoveHistory";
 import NotFound from "./pages/NotFound";
@@ -67,7 +69,7 @@ const App = () => (
               path="/transfers"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Transfers />
                 </ProtectedRoute>
               }
             />
@@ -75,7 +77,7 @@ const App = () => (
               path="/adjustments"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Adjustments />
                 </ProtectedRoute>
               }
             />
