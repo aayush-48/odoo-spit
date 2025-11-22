@@ -22,34 +22,84 @@ const MoveHistory = () => {
 
   const movements = [
     {
-      reference: 'WH/IN/0001',
-      date: '12/5/2024',
-      content: 'Acme Exterior',
+      reference: 'DEL-001',
+      date: '02/20/2024',
+      content: 'ABC Manufacturing Corp.',
       from: 'Vendor',
-      to: 'WH/Stock1',
-      quantity: 100,
-      status: 'Ready',
+      to: 'WH-001',
+      quantity: 85,
+      status: 'Done',
       type: 'In',
     },
     {
-      reference: 'WH/OUT/0002',
-      date: '12/4/2024',
-      content: 'Acme Exterior',
-      from: 'WH/Stock1',
-      to: 'Vendor',
-      quantity: 50,
+      reference: 'DEL-002',
+      date: '02/19/2024',
+      content: 'XYZ Industrial Solutions',
+      from: 'WH-002',
+      to: 'Customer',
+      quantity: 5,
       status: 'Ready',
       type: 'Out',
     },
     {
-      reference: 'WH/OUT/0002',
-      date: '12/3/2024',
-      content: 'Acme Exterior',
-      from: 'WH/Stock2',
-      to: 'Vendor',
-      quantity: 25,
+      reference: 'TRF-001',
+      date: '02/19/2024',
+      content: 'Stock Rebalancing',
+      from: 'WH-001',
+      to: 'WH-002',
+      quantity: 150,
+      status: 'Done',
+      type: 'Internal',
+    },
+    {
+      reference: 'DEL-003',
+      date: '02/18/2024',
+      content: 'Premium Parts Distributors',
+      from: 'Vendor',
+      to: 'WH-002',
+      quantity: 150,
+      status: 'Done',
+      type: 'In',
+    },
+    {
+      reference: 'TRF-002',
+      date: '02/17/2024',
+      content: 'Transfer to South Hub',
+      from: 'WH-002',
+      to: 'WH-003',
+      quantity: 10,
       status: 'Ready',
+      type: 'Internal',
+    },
+    {
+      reference: 'ADJ-001',
+      date: '02/16/2024',
+      content: 'Stock Adjustment',
+      from: 'WH-001',
+      to: 'WH-001',
+      quantity: 25,
+      status: 'Done',
+      type: 'In',
+    },
+    {
+      reference: 'DEL-004',
+      date: '02/15/2024',
+      content: 'Tech Components Ltd.',
+      from: 'WH-001',
+      to: 'Customer',
+      quantity: 40,
+      status: 'Done',
       type: 'Out',
+    },
+    {
+      reference: 'TRF-003',
+      date: '02/14/2024',
+      content: 'Quality Check Return',
+      from: 'WH-003',
+      to: 'WH-001',
+      quantity: 45,
+      status: 'Done',
+      type: 'Internal',
     },
   ];
 
@@ -67,9 +117,16 @@ const MoveHistory = () => {
   };
 
   const getTypeColor = (type: string) => {
-    return type === 'In' 
-      ? 'bg-success/10 text-success border-success/20'
-      : 'bg-destructive/10 text-destructive border-destructive/20';
+    switch (type) {
+      case 'In':
+        return 'bg-success/10 text-success border-success/20';
+      case 'Out':
+        return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'Internal':
+        return 'bg-accent/10 text-accent border-accent/20';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
   };
 
   return (
@@ -130,6 +187,7 @@ const MoveHistory = () => {
               <SelectItem value="in">Incoming</SelectItem>
               <SelectItem value="out">Outgoing</SelectItem>
               <SelectItem value="internal">Internal Transfer</SelectItem>
+              <SelectItem value="adjustment">Adjustment</SelectItem>
             </SelectContent>
           </Select>
 

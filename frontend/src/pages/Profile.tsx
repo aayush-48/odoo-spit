@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useInventory } from '@/context/InventoryContext';
-import { User, Mail, Shield, Save, Edit2, X } from 'lucide-react';
+import { User, Mail, Shield, Save, Edit2, X, Clock, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 const Profile = () => {
   const { user } = useInventory();
@@ -59,6 +61,51 @@ const Profile = () => {
   const getRoleLabel = (role: string) => {
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
+
+  // Dummy activity data
+  const activityStats = {
+    totalProducts: 156,
+    documentsCreated: 42,
+    lastLogin: format(new Date(Date.now() - 2 * 60 * 60 * 1000), 'MMM dd, HH:mm'),
+  };
+
+  const recentActivities = [
+    {
+      id: 1,
+      action: 'Created Receipt',
+      description: 'Receipt DEL-001 for ABC Manufacturing Corp.',
+      timestamp: format(new Date(Date.now() - 30 * 60 * 1000), 'MMM dd, HH:mm'),
+      type: 'receipt',
+    },
+    {
+      id: 2,
+      action: 'Updated Product',
+      description: 'Updated stock levels for Industrial Bolt M12x50',
+      timestamp: format(new Date(Date.now() - 2 * 60 * 60 * 1000), 'MMM dd, HH:mm'),
+      type: 'product',
+    },
+    {
+      id: 3,
+      action: 'Confirmed Delivery',
+      description: 'Delivery DEL-002 confirmed and shipped',
+      timestamp: format(new Date(Date.now() - 5 * 60 * 60 * 1000), 'MMM dd, HH:mm'),
+      type: 'delivery',
+    },
+    {
+      id: 4,
+      action: 'Created Transfer',
+      description: 'Transfer TRF-001 from WH-001 to WH-002',
+      timestamp: format(new Date(Date.now() - 8 * 60 * 60 * 1000), 'MMM dd, HH:mm'),
+      type: 'transfer',
+    },
+    {
+      id: 5,
+      action: 'Stock Adjustment',
+      description: 'Adjusted stock for Safety Helmet Industrial',
+      timestamp: format(new Date(Date.now() - 12 * 60 * 60 * 1000), 'MMM dd, HH:mm'),
+      type: 'adjustment',
+    },
+  ];
 
   if (!user) {
     return (
@@ -234,7 +281,7 @@ const Profile = () => {
           </Card>
         </div>
 
-        {/* Activity Summary (Optional) */}
+        {/* Activity Summary */}
         <Card className="border-2">
           <CardHeader>
             <CardTitle>Activity Summary</CardTitle>
@@ -243,24 +290,53 @@ const Profile = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="p-4 bg-muted/50 rounded-lg border border-border">
-                <p className="text-sm text-muted-foreground">Total Products</p>
-                <p className="text-2xl font-bold text-foreground mt-1">-</p>
+                <p className="text-sm text-muted-foreground">Total Products Managed</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{activityStats.totalProducts}</p>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg border border-border">
                 <p className="text-sm text-muted-foreground">Documents Created</p>
-                <p className="text-2xl font-bold text-foreground mt-1">-</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{activityStats.documentsCreated}</p>
               </div>
               <div className="p-4 bg-muted/50 rounded-lg border border-border">
                 <p className="text-sm text-muted-foreground">Last Login</p>
-                <p className="text-2xl font-bold text-foreground mt-1">-</p>
+                <p className="text-lg font-semibold text-foreground mt-1 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {activityStats.lastLogin}
+                </p>
               </div>
             </div>
-            <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border">
-              <p className="text-sm text-muted-foreground text-center">
-                Activity tracking will be available soon
-              </p>
+
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Recent Activity</h4>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Action</TableHead>
+                      <TableHead className="font-semibold">Description</TableHead>
+                      <TableHead className="font-semibold text-right">Time</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentActivities.map((activity) => (
+                      <TableRow key={activity.id} className="hover:bg-muted/30 transition-colors">
+                        <TableCell>
+                          <Badge variant="outline" className="font-medium">
+                            {activity.action}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{activity.description}</TableCell>
+                        <TableCell className="text-right text-sm text-muted-foreground flex items-center justify-end gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {activity.timestamp}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </CardContent>
         </Card>

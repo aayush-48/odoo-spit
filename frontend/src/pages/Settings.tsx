@@ -67,7 +67,7 @@ const Settings = () => {
                       <TableRow>
                         <TableCell className="font-medium">Industrial Bolt M12x50</TableCell>
                         <TableCell>$2.50</TableCell>
-                        <TableCell className="text-right font-semibold">1000</TableCell>
+                        <TableCell className="text-right font-semibold">1,000</TableCell>
                         <TableCell className="text-right">850</TableCell>
                       </TableRow>
                       <TableRow>
@@ -81,6 +81,36 @@ const Settings = () => {
                         <TableCell>$85.00</TableCell>
                         <TableCell className="text-right font-semibold">190</TableCell>
                         <TableCell className="text-right">165</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Safety Helmet Industrial</TableCell>
+                        <TableCell>$25.00</TableCell>
+                        <TableCell className="text-right font-semibold">330</TableCell>
+                        <TableCell className="text-right">280</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Electric Motor 3HP</TableCell>
+                        <TableCell>$320.00</TableCell>
+                        <TableCell className="text-right font-semibold">50</TableCell>
+                        <TableCell className="text-right">42</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Rubber Gasket Set</TableCell>
+                        <TableCell>$15.00</TableCell>
+                        <TableCell className="text-right font-semibold">540</TableCell>
+                        <TableCell className="text-right">480</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Industrial Lubricant 5L</TableCell>
+                        <TableCell>$45.00</TableCell>
+                        <TableCell className="text-right font-semibold">235</TableCell>
+                        <TableCell className="text-right">200</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Cable Reel 100m</TableCell>
+                        <TableCell>$120.00</TableCell>
+                        <TableCell className="text-right font-semibold">105</TableCell>
+                        <TableCell className="text-right">90</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>

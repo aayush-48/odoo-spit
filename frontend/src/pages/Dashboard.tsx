@@ -96,26 +96,47 @@ const Dashboard = () => {
             Recent Activity
           </h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-success" />
-                <span className="text-sm font-medium">Receipt #R-001 completed</span>
+                <span className="text-sm font-medium">Receipt DEL-001 completed for ABC Manufacturing Corp.</span>
               </div>
               <span className="text-xs text-muted-foreground">2 hours ago</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-warning" />
                 <span className="text-sm font-medium">Low stock alert: Industrial Bolt M12x50</span>
               </div>
               <span className="text-xs text-muted-foreground">4 hours ago</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-accent" />
-                <span className="text-sm font-medium">Transfer initiated: WH-001 → WH-002</span>
+                <span className="text-sm font-medium">Transfer TRF-001 initiated: WH-001 → WH-002</span>
               </div>
               <span className="text-xs text-muted-foreground">6 hours ago</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-success" />
+                <span className="text-sm font-medium">Delivery DEL-002 packed and ready for shipment</span>
+              </div>
+              <span className="text-xs text-muted-foreground">8 hours ago</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-accent" />
+                <span className="text-sm font-medium">New product added: Pneumatic Valve V-100</span>
+              </div>
+              <span className="text-xs text-muted-foreground">12 hours ago</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-warning" />
+                <span className="text-sm font-medium">Stock adjustment created for Safety Equipment category</span>
+              </div>
+              <span className="text-xs text-muted-foreground">1 day ago</span>
             </div>
           </div>
         </div>
