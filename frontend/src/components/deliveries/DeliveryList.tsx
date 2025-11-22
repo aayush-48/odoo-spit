@@ -21,9 +21,10 @@ const DeliveryList = ({ onEdit, onView, onPick, onPack, onConfirm, onCancel }: D
 
   const filteredDeliveries = useMemo(() => {
     return deliveries.filter(delivery => {
+      const customerName = delivery.customerName || '';
       const matchesSearch = !filters.searchQuery || 
         delivery.id.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
-        delivery.customerName?.toLowerCase().includes(filters.searchQuery.toLowerCase());
+        customerName.toLowerCase().includes(filters.searchQuery.toLowerCase());
       
       const matchesStatus = filters.status === 'all' || delivery.status === filters.status;
       const matchesWarehouse = filters.warehouseId === 'all' || delivery.warehouseId === filters.warehouseId;
