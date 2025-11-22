@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product, Warehouse, Receipt, Delivery, Transfer, Adjustment, Supplier, User, FilterState } from '@/types';
-import { initialProducts, initialWarehouses, initialSuppliers } from '@/lib/mockData';
+import { initialProducts, initialWarehouses, initialSuppliers, initialDeliveries, initialTransfers } from '@/lib/mockData';
 
 interface InventoryContextType {
   // Data
@@ -51,8 +51,8 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [warehouses] = useState<Warehouse[]>(initialWarehouses);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
-  const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>(initialDeliveries);
+  const [transfers, setTransfers] = useState<Transfer[]>(initialTransfers);
   const [adjustments, setAdjustments] = useState<Adjustment[]>([]);
   const [suppliers] = useState<Supplier[]>(initialSuppliers);
   const [user, setUser] = useState<User | null>(null);

@@ -1,4 +1,4 @@
-import { Product, Warehouse, Supplier } from '@/types';
+import { Product, Warehouse, Supplier, Delivery, Transfer } from '@/types';
 
 export const initialWarehouses: Warehouse[] = [
   {
@@ -152,5 +152,166 @@ export const initialProducts: Product[] = [
     minStock: 10,
     createdAt: new Date('2024-02-15'),
     updatedAt: new Date('2024-02-15'),
+  },
+];
+
+export const initialDeliveries: Delivery[] = [
+  {
+    id: 'DEL-001',
+    warehouseId: 'wh1',
+    status: 'done',
+    customerName: 'ABC Manufacturing Corp.',
+    lines: [
+      { productId: 'prod1', quantity: 50 },
+      { productId: 'prod4', quantity: 25 },
+      { productId: 'prod6', quantity: 10 },
+    ],
+    createdAt: new Date('2024-02-20'),
+    updatedAt: new Date('2024-02-20'),
+    notes: 'Urgent delivery for production line',
+  },
+  {
+    id: 'DEL-002',
+    warehouseId: 'wh2',
+    status: 'ready',
+    customerName: 'XYZ Industrial Solutions',
+    lines: [
+      { productId: 'prod2', quantity: 2 },
+      { productId: 'prod5', quantity: 3 },
+    ],
+    createdAt: new Date('2024-02-22'),
+    updatedAt: new Date('2024-02-23'),
+    notes: 'Ready for shipment',
+  },
+  {
+    id: 'DEL-003',
+    warehouseId: 'wh1',
+    status: 'waiting',
+    customerName: 'Tech Components Ltd.',
+    lines: [
+      { productId: 'prod3', quantity: 15 },
+      { productId: 'prod8', quantity: 5 },
+      { productId: 'prod9', quantity: 20 },
+    ],
+    createdAt: new Date('2024-02-24'),
+    updatedAt: new Date('2024-02-24'),
+  },
+  {
+    id: 'DEL-004',
+    warehouseId: 'wh3',
+    status: 'draft',
+    customerName: 'Global Machinery Inc.',
+    lines: [
+      { productId: 'prod7', quantity: 12 },
+      { productId: 'prod10', quantity: 4 },
+    ],
+    createdAt: new Date('2024-02-25'),
+    updatedAt: new Date('2024-02-25'),
+    notes: 'Pending customer confirmation',
+  },
+  {
+    id: 'DEL-005',
+    warehouseId: 'wh2',
+    status: 'done',
+    customerName: 'Premium Parts Distributors',
+    lines: [
+      { productId: 'prod1', quantity: 100 },
+      { productId: 'prod6', quantity: 20 },
+      { productId: 'prod4', quantity: 30 },
+    ],
+    createdAt: new Date('2024-02-18'),
+    updatedAt: new Date('2024-02-19'),
+  },
+  {
+    id: 'DEL-006',
+    warehouseId: 'wh3',
+    status: 'canceled',
+    customerName: 'Small Business Supply Co.',
+    lines: [
+      { productId: 'prod5', quantity: 2 },
+    ],
+    createdAt: new Date('2024-02-21'),
+    updatedAt: new Date('2024-02-21'),
+    notes: 'Customer canceled order',
+  },
+];
+
+export const initialTransfers: Transfer[] = [
+  {
+    id: 'TRF-001',
+    fromWarehouseId: 'wh1',
+    toWarehouseId: 'wh2',
+    status: 'done',
+    lines: [
+      { productId: 'prod1', quantity: 100 },
+      { productId: 'prod4', quantity: 50 },
+    ],
+    createdAt: new Date('2024-02-19'),
+    updatedAt: new Date('2024-02-19'),
+    notes: 'Stock rebalancing for North DC',
+  },
+  {
+    id: 'TRF-002',
+    fromWarehouseId: 'wh2',
+    toWarehouseId: 'wh3',
+    status: 'ready',
+    lines: [
+      { productId: 'prod2', quantity: 3 },
+      { productId: 'prod5', quantity: 5 },
+      { productId: 'prod10', quantity: 2 },
+    ],
+    createdAt: new Date('2024-02-23'),
+    updatedAt: new Date('2024-02-23'),
+    notes: 'Transfer to South Hub for upcoming orders',
+  },
+  {
+    id: 'TRF-003',
+    fromWarehouseId: 'wh1',
+    toWarehouseId: 'wh3',
+    status: 'waiting',
+    lines: [
+      { productId: 'prod3', quantity: 20 },
+      { productId: 'prod7', quantity: 15 },
+      { productId: 'prod8', quantity: 10 },
+    ],
+    createdAt: new Date('2024-02-24'),
+    updatedAt: new Date('2024-02-24'),
+  },
+  {
+    id: 'TRF-004',
+    fromWarehouseId: 'wh3',
+    toWarehouseId: 'wh1',
+    status: 'draft',
+    lines: [
+      { productId: 'prod9', quantity: 30 },
+      { productId: 'prod6', quantity: 15 },
+    ],
+    createdAt: new Date('2024-02-25'),
+    updatedAt: new Date('2024-02-25'),
+    notes: 'Return transfer for quality check',
+  },
+  {
+    id: 'TRF-005',
+    fromWarehouseId: 'wh2',
+    toWarehouseId: 'wh1',
+    status: 'done',
+    lines: [
+      { productId: 'prod1', quantity: 50 },
+      { productId: 'prod4', quantity: 25 },
+    ],
+    createdAt: new Date('2024-02-17'),
+    updatedAt: new Date('2024-02-17'),
+  },
+  {
+    id: 'TRF-006',
+    fromWarehouseId: 'wh1',
+    toWarehouseId: 'wh2',
+    status: 'canceled',
+    lines: [
+      { productId: 'prod2', quantity: 2 },
+    ],
+    createdAt: new Date('2024-02-20'),
+    updatedAt: new Date('2024-02-20'),
+    notes: 'Transfer canceled - insufficient stock',
   },
 ];
