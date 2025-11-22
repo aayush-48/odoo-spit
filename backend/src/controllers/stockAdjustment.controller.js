@@ -65,6 +65,145 @@ export const createStockAdjustment = async (req, res) => {
   }
 };
 
+export const getStockAdjustments = async (req, res) => {
+  try {
+    const { status, warehouse, fromDate, toDate } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (warehouse) filter.warehouse = warehouse;
+    if (fromDate || toDate) {
+      filter.createdAt = {};
+      if (fromDate) filter.createdAt.$gte = new Date(fromDate);
+      if (toDate) filter.createdAt.$lte = new Date(toDate);
+    }
+
+    const adjustments = await StockAdjustment.find(filter)
+      .populate("warehouse")
+      .populate("lines.product")
+      .populate("lines.location")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: adjustments });
+  } catch (err) {
+    console.error("getStockAdjustments error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const getStockAdjustmentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adjustment = await StockAdjustment.findById(id)
+      .populate("warehouse")
+      .populate("lines.product")
+      .populate("lines.location")
+      .populate("createdBy", "name email");
+
+    if (!adjustment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Stock adjustment not found" });
+    }
+
+    res.json({ success: true, data: adjustment });
+  } catch (err) {
+    console.error("getStockAdjustmentById error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const updateStockAdjustment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const adjustment = await StockAdjustment.findById(id);
+    if (!adjustment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Stock adjustment not found" });
+    }
+
+    if (adjustment.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update confirmed adjustment",
+      });
+    }
+
+    // If lines are being updated, recalculate differences
+    if (updateData.lines && Array.isArray(updateData.lines)) {
+      const enrichedLines = [];
+      for (const line of updateData.lines) {
+        const { product, location, countedQuantity, unit, reason } = line;
+        const current = await StockLevel.findOne({
+          product,
+          warehouse: adjustment.warehouse,
+          location,
+        });
+
+        const previousQuantity = current?.quantity || 0;
+        const difference = countedQuantity - previousQuantity;
+
+        enrichedLines.push({
+          product,
+          location,
+          countedQuantity,
+          previousQuantity,
+          difference,
+          unit,
+          reason,
+        });
+      }
+      updateData.lines = enrichedLines;
+    }
+
+    Object.assign(adjustment, updateData);
+    await adjustment.save();
+
+    res.json({
+      success: true,
+      data: adjustment,
+      message: "Stock adjustment updated",
+    });
+  } catch (err) {
+    console.error("updateStockAdjustment error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const cancelStockAdjustment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adjustment = await StockAdjustment.findById(id);
+
+    if (!adjustment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Stock adjustment not found" });
+    }
+
+    if (adjustment.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot cancel confirmed adjustment",
+      });
+    }
+
+    adjustment.status = "CANCELED";
+    await adjustment.save();
+
+    res.json({
+      success: true,
+      data: adjustment,
+      message: "Stock adjustment canceled",
+    });
+  } catch (err) {
+    console.error("cancelStockAdjustment error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export const confirmStockAdjustment = async (req, res) => {
   try {
     const { id } = req.params;

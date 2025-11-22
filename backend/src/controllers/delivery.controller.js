@@ -67,6 +67,156 @@ export const getDeliveryOrders = async (req, res) => {
   }
 };
 
+export const getDeliveryOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await DeliveryOrder.findById(id)
+      .populate("warehouse")
+      .populate("lines.product")
+      .populate("createdBy", "name email");
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Delivery order not found" });
+    }
+
+    res.json({ success: true, data: order });
+  } catch (err) {
+    console.error("getDeliveryOrderById error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const updateDeliveryOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const order = await DeliveryOrder.findById(id);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Delivery order not found" });
+    }
+
+    if (order.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update confirmed delivery",
+      });
+    }
+
+    Object.assign(order, updateData);
+    await order.save();
+
+    res.json({
+      success: true,
+      data: order,
+      message: "Delivery order updated",
+    });
+  } catch (err) {
+    console.error("updateDeliveryOrder error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const pickDeliveryOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await DeliveryOrder.findById(id);
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Delivery order not found" });
+    }
+
+    if (order.status !== "DRAFT") {
+      return res.status(400).json({
+        success: false,
+        message: "Can only pick draft delivery orders",
+      });
+    }
+
+    order.status = "WAITING"; // Picked status
+    await order.save();
+
+    res.json({
+      success: true,
+      data: order,
+      message: "Items marked as picked",
+    });
+  } catch (err) {
+    console.error("pickDeliveryOrder error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const packDeliveryOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await DeliveryOrder.findById(id);
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Delivery order not found" });
+    }
+
+    if (order.status !== "WAITING") {
+      return res.status(400).json({
+        success: false,
+        message: "Can only pack picked delivery orders",
+      });
+    }
+
+    order.status = "READY"; // Packed status
+    await order.save();
+
+    res.json({
+      success: true,
+      data: order,
+      message: "Items marked as packed",
+    });
+  } catch (err) {
+    console.error("packDeliveryOrder error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const cancelDeliveryOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await DeliveryOrder.findById(id);
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Delivery order not found" });
+    }
+
+    if (order.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot cancel confirmed delivery",
+      });
+    }
+
+    order.status = "CANCELED";
+    await order.save();
+
+    res.json({
+      success: true,
+      data: order,
+      message: "Delivery order canceled",
+    });
+  } catch (err) {
+    console.error("cancelDeliveryOrder error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Confirm -> stock decreases
 export const confirmDeliveryOrder = async (req, res) => {
   try {

@@ -70,6 +70,93 @@ export const getTransfers = async (req, res) => {
   }
 };
 
+export const getTransferById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const transfer = await Transfer.findById(id)
+      .populate("fromWarehouse")
+      .populate("toWarehouse")
+      .populate("lines.product")
+      .populate("createdBy", "name email");
+
+    if (!transfer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Transfer not found" });
+    }
+
+    res.json({ success: true, data: transfer });
+  } catch (err) {
+    console.error("getTransferById error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const updateTransfer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const transfer = await Transfer.findById(id);
+    if (!transfer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Transfer not found" });
+    }
+
+    if (transfer.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update confirmed transfer",
+      });
+    }
+
+    Object.assign(transfer, updateData);
+    await transfer.save();
+
+    res.json({
+      success: true,
+      data: transfer,
+      message: "Transfer updated",
+    });
+  } catch (err) {
+    console.error("updateTransfer error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const cancelTransfer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const transfer = await Transfer.findById(id);
+
+    if (!transfer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Transfer not found" });
+    }
+
+    if (transfer.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot cancel confirmed transfer",
+      });
+    }
+
+    transfer.status = "CANCELED";
+    await transfer.save();
+
+    res.json({
+      success: true,
+      data: transfer,
+      message: "Transfer canceled",
+    });
+  } catch (err) {
+    console.error("cancelTransfer error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Confirm -> move stock source -> dest (total stock unchanged)
 export const confirmTransfer = async (req, res) => {
   try {

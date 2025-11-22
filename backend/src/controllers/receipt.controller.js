@@ -67,6 +67,92 @@ export const getReceipts = async (req, res) => {
   }
 };
 
+export const getReceiptById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const receipt = await Receipt.findById(id)
+      .populate("warehouse")
+      .populate("lines.product")
+      .populate("createdBy", "name email");
+
+    if (!receipt) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Receipt not found" });
+    }
+
+    res.json({ success: true, data: receipt });
+  } catch (err) {
+    console.error("getReceiptById error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const updateReceipt = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const receipt = await Receipt.findById(id);
+    if (!receipt) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Receipt not found" });
+    }
+
+    if (receipt.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update confirmed receipt",
+      });
+    }
+
+    Object.assign(receipt, updateData);
+    await receipt.save();
+
+    res.json({
+      success: true,
+      data: receipt,
+      message: "Receipt updated",
+    });
+  } catch (err) {
+    console.error("updateReceipt error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const cancelReceipt = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const receipt = await Receipt.findById(id);
+
+    if (!receipt) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Receipt not found" });
+    }
+
+    if (receipt.status === "DONE") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot cancel confirmed receipt",
+      });
+    }
+
+    receipt.status = "CANCELED";
+    await receipt.save();
+
+    res.json({
+      success: true,
+      data: receipt,
+      message: "Receipt canceled",
+    });
+  } catch (err) {
+    console.error("cancelReceipt error", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Validate / confirm receipt -> stock increases, ledger entries
 export const confirmReceipt = async (req, res) => {
   try {
