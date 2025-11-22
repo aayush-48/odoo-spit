@@ -1,6 +1,13 @@
 export type DocumentStatus = 'draft' | 'waiting' | 'ready' | 'done' | 'canceled';
 export type DocumentType = 'receipt' | 'delivery' | 'internal' | 'adjustment';
 
+export interface ReorderingRule {
+  reorderPoint: number; // Trigger level for reordering
+  reorderQuantity: number; // Fixed order amount
+  leadTimeDays: number; // Days until order arrives
+  autoReorder: boolean; // Automatically create reorder when point is reached
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -9,6 +16,8 @@ export interface Product {
   unitOfMeasure: string;
   stock: Record<string, number>; // warehouse/location ID -> quantity
   minStock?: number;
+  maxStock?: number;
+  reorderingRules?: Record<string, ReorderingRule>; // warehouse ID -> reordering rule
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +27,14 @@ export interface Warehouse {
   name: string;
   code: string;
   address: string;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  code: string;
+  warehouseId: string;
+  description?: string;
 }
 
 export interface Supplier {

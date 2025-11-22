@@ -4,9 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Product } from '@/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Product, ReorderingRule } from '@/types';
 import { toast } from 'sonner';
+import { Settings, Package } from 'lucide-react';
 
 interface ProductFormProps {
   open: boolean;
@@ -22,9 +26,12 @@ const ProductForm = ({ open, onClose, editingProduct }: ProductFormProps) => {
     category: '',
     unitOfMeasure: '',
     minStock: 0,
+    maxStock: 0,
   });
 
   const [stockLevels, setStockLevels] = useState<Record<string, number>>({});
+  const [reorderingRules, setReorderingRules] = useState<Record<string, ReorderingRule>>({});
+  const [selectedWarehouseForRule, setSelectedWarehouseForRule] = useState<string>('');
 
   useEffect(() => {
     if (editingProduct) {
@@ -34,8 +41,10 @@ const ProductForm = ({ open, onClose, editingProduct }: ProductFormProps) => {
         category: editingProduct.category,
         unitOfMeasure: editingProduct.unitOfMeasure,
         minStock: editingProduct.minStock || 0,
+        maxStock: editingProduct.maxStock || 0,
       });
       setStockLevels(editingProduct.stock);
+      setReorderingRules(editingProduct.reorderingRules || {});
     } else {
       setFormData({
         name: '',
@@ -43,33 +52,75 @@ const ProductForm = ({ open, onClose, editingProduct }: ProductFormProps) => {
         category: '',
         unitOfMeasure: '',
         minStock: 0,
+        maxStock: 0,
       });
       const initialStock: Record<string, number> = {};
       warehouses.forEach(wh => {
         initialStock[wh.id] = 0;
       });
       setStockLevels(initialStock);
+      setReorderingRules({});
+    }
+    if (warehouses.length > 0 && !selectedWarehouseForRule) {
+      setSelectedWarehouseForRule(warehouses[0].id);
     }
   }, [editingProduct, warehouses, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const productData = {
+      ...formData,
+      stock: stockLevels,
+      reorderingRules: Object.keys(reorderingRules).length > 0 ? reorderingRules : undefined,
+    };
+    
     if (editingProduct) {
-      updateProduct(editingProduct.id, {
-        ...formData,
-        stock: stockLevels,
-      });
+      updateProduct(editingProduct.id, productData);
       toast.success('Product updated successfully');
     } else {
-      addProduct({
-        ...formData,
-        stock: stockLevels,
-      });
+      addProduct(productData);
       toast.success('Product added successfully');
     }
     
     onClose();
+  };
+
+  const handleAddReorderingRule = () => {
+    if (!selectedWarehouseForRule) {
+      toast.error('Please select a warehouse');
+      return;
+    }
+    
+    const newRule: ReorderingRule = {
+      reorderPoint: formData.minStock || 0,
+      reorderQuantity: formData.minStock ? formData.minStock * 2 : 100,
+      leadTimeDays: 7,
+      autoReorder: false,
+    };
+    
+    setReorderingRules({
+      ...reorderingRules,
+      [selectedWarehouseForRule]: newRule,
+    });
+    toast.success('Reordering rule added');
+  };
+
+  const handleUpdateReorderingRule = (warehouseId: string, rule: Partial<ReorderingRule>) => {
+    setReorderingRules({
+      ...reorderingRules,
+      [warehouseId]: {
+        ...reorderingRules[warehouseId],
+        ...rule,
+      },
+    });
+  };
+
+  const handleRemoveReorderingRule = (warehouseId: string) => {
+    const newRules = { ...reorderingRules };
+    delete newRules[warehouseId];
+    setReorderingRules(newRules);
+    toast.success('Reordering rule removed');
   };
 
   return (
@@ -142,25 +193,39 @@ const ProductForm = ({ open, onClose, editingProduct }: ProductFormProps) => {
               />
             </div>
 
-            <div className="space-y-2 col-span-2">
+            <div className="space-y-2">
               <Label htmlFor="minStock">Minimum Stock Level</Label>
               <Input
                 id="minStock"
                 type="number"
                 value={formData.minStock}
                 onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 0 })}
+                min="0"
+                className="bg-background"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="maxStock">Maximum Stock Level</Label>
+              <Input
+                id="maxStock"
+                type="number"
+                value={formData.maxStock}
+                onChange={(e) => setFormData({ ...formData, maxStock: parseInt(e.target.value) || 0 })}
+                min="0"
                 className="bg-background"
               />
             </div>
           </div>
 
-          <div className="border-t border-border pt-4">
-            <h4 className="font-semibold text-foreground mb-4">Initial Stock Levels by Warehouse</h4>
-            <div className="grid grid-cols-2 gap-4">
+          {/* Stock Levels by Warehouse */}
+          <div className="space-y-2">
+            <Label>Initial Stock by Warehouse</Label>
+            <div className="grid grid-cols-2 gap-2">
               {warehouses.map((warehouse) => (
-                <div key={warehouse.id} className="space-y-2">
-                  <Label htmlFor={`stock-${warehouse.id}`}>
-                    {warehouse.name} ({warehouse.code})
+                <div key={warehouse.id} className="space-y-1">
+                  <Label htmlFor={`stock-${warehouse.id}`} className="text-sm">
+                    {warehouse.name}
                   </Label>
                   <Input
                     id={`stock-${warehouse.id}`}
@@ -168,13 +233,141 @@ const ProductForm = ({ open, onClose, editingProduct }: ProductFormProps) => {
                     value={stockLevels[warehouse.id] || 0}
                     onChange={(e) => setStockLevels({
                       ...stockLevels,
-                      [warehouse.id]: parseInt(e.target.value) || 0
+                      [warehouse.id]: parseInt(e.target.value) || 0,
                     })}
+                    min="0"
                     className="bg-background"
                   />
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Reordering Rules */}
+          <div className="space-y-4 border-t border-border pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-accent" />
+                <Label className="text-base font-semibold">Reordering Rules</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedWarehouseForRule}
+                  onValueChange={setSelectedWarehouseForRule}
+                >
+                  <SelectTrigger className="w-40 bg-background">
+                    <SelectValue placeholder="Select warehouse" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover">
+                    {warehouses.filter(wh => !reorderingRules[wh.id]).map((wh) => (
+                      <SelectItem key={wh.id} value={wh.id}>
+                        {wh.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddReorderingRule}
+                  disabled={!selectedWarehouseForRule || !!reorderingRules[selectedWarehouseForRule]}
+                  className="gap-1"
+                >
+                  <Package className="w-3 h-3" />
+                  Add Rule
+                </Button>
+              </div>
+            </div>
+
+            {Object.keys(reorderingRules).length === 0 ? (
+              <div className="p-4 bg-muted/50 rounded-lg border border-border text-center text-sm text-muted-foreground">
+                No reordering rules configured. Add rules to enable automatic reorder suggestions.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(reorderingRules).map(([warehouseId, rule]) => {
+                  const warehouse = warehouses.find(w => w.id === warehouseId);
+                  return (
+                    <Card key={warehouseId} className="border-2">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm font-semibold">
+                            {warehouse?.name || 'Unknown Warehouse'}
+                          </CardTitle>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveReorderingRule(warehouseId)}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs">Reorder Point</Label>
+                            <Input
+                              type="number"
+                              value={rule.reorderPoint}
+                              onChange={(e) => handleUpdateReorderingRule(warehouseId, {
+                                reorderPoint: parseInt(e.target.value) || 0,
+                              })}
+                              min="0"
+                              className="bg-background text-sm"
+                            />
+                            <p className="text-xs text-muted-foreground">Trigger level</p>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Reorder Quantity</Label>
+                            <Input
+                              type="number"
+                              value={rule.reorderQuantity}
+                              onChange={(e) => handleUpdateReorderingRule(warehouseId, {
+                                reorderQuantity: parseInt(e.target.value) || 0,
+                              })}
+                              min="0"
+                              className="bg-background text-sm"
+                            />
+                            <p className="text-xs text-muted-foreground">Order amount</p>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Lead Time (Days)</Label>
+                            <Input
+                              type="number"
+                              value={rule.leadTimeDays}
+                              onChange={(e) => handleUpdateReorderingRule(warehouseId, {
+                                leadTimeDays: parseInt(e.target.value) || 0,
+                              })}
+                              min="0"
+                              className="bg-background text-sm"
+                            />
+                            <p className="text-xs text-muted-foreground">Days until arrival</p>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Auto Reorder</Label>
+                            <div className="flex items-center gap-2 pt-2">
+                              <Switch
+                                checked={rule.autoReorder}
+                                onCheckedChange={(checked) => handleUpdateReorderingRule(warehouseId, {
+                                  autoReorder: checked,
+                                })}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {rule.autoReorder ? 'Enabled' : 'Disabled'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2">

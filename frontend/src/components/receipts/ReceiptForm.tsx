@@ -15,9 +15,14 @@ interface ReceiptFormProps {
   open: boolean;
   onClose: () => void;
   editingReceipt?: Receipt | null;
+  suggestedData?: {
+    productId?: string;
+    warehouseId?: string;
+    quantity?: number;
+  } | null;
 }
 
-const ReceiptForm = ({ open, onClose, editingReceipt }: ReceiptFormProps) => {
+const ReceiptForm = ({ open, onClose, editingReceipt, suggestedData }: ReceiptFormProps) => {
   const { addReceipt, updateReceipt, products, warehouses, suppliers } = useInventory();
   const [formData, setFormData] = useState({
     supplierId: '',
@@ -39,18 +44,26 @@ const ReceiptForm = ({ open, onClose, editingReceipt }: ReceiptFormProps) => {
         notes: editingReceipt.notes || '',
       });
       setLines(editingReceipt.lines);
+      setSelectedProductId('');
+      setQuantity(1);
     } else {
       setFormData({
         supplierId: '',
-        warehouseId: '',
+        warehouseId: suggestedData?.warehouseId || '',
         status: 'draft',
         notes: '',
       });
       setLines([]);
+      // Pre-fill suggested data
+      if (suggestedData?.productId && suggestedData?.quantity) {
+        setSelectedProductId(suggestedData.productId);
+        setQuantity(suggestedData.quantity);
+      } else {
+        setSelectedProductId('');
+        setQuantity(1);
+      }
     }
-    setSelectedProductId('');
-    setQuantity(1);
-  }, [editingReceipt, open]);
+  }, [editingReceipt, open, suggestedData]);
 
   const handleAddLine = () => {
     if (!selectedProductId) {

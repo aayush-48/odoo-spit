@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import ReceiptList from '@/components/receipts/ReceiptList';
 import ReceiptForm from '@/components/receipts/ReceiptForm';
@@ -11,11 +12,38 @@ import { Receipt } from '@/types';
 import { toast } from 'sonner';
 
 const Receipts = () => {
+  const location = useLocation();
   const [formOpen, setFormOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [suggestedData, setSuggestedData] = useState<{
+    productId?: string;
+    warehouseId?: string;
+    quantity?: number;
+  } | null>(null);
   const { receipts, updateReceipt, confirmReceipt } = useInventory();
+
+  // Handle suggested data from predictions
+  useEffect(() => {
+    if (location.state) {
+      const { suggestedProduct, suggestedWarehouse, suggestedQuantity } = location.state as {
+        suggestedProduct?: string;
+        suggestedWarehouse?: string;
+        suggestedQuantity?: number;
+      };
+      if (suggestedProduct || suggestedWarehouse || suggestedQuantity) {
+        setSuggestedData({
+          productId: suggestedProduct,
+          warehouseId: suggestedWarehouse,
+          quantity: suggestedQuantity,
+        });
+        setFormOpen(true);
+        // Clear state to prevent reopening on navigation
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state]);
 
   const handleEdit = (id: string) => {
     setEditingId(id);
@@ -42,6 +70,7 @@ const Receipts = () => {
     setDetailsOpen(false);
     setEditingId(null);
     setViewingId(null);
+    setSuggestedData(null);
   };
 
   const editingReceipt = editingId ? receipts.find(r => r.id === editingId) : null;
@@ -91,6 +120,7 @@ const Receipts = () => {
           open={formOpen}
           onClose={handleClose}
           editingReceipt={editingReceipt}
+          suggestedData={suggestedData}
         />
 
         <ReceiptDetails

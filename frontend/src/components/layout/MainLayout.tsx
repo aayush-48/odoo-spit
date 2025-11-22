@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import ChatBot from '@/components/chatbot/ChatBot';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {children}
         </main>
       </div>
+      <ChatBot />
     </div>
   );
 };

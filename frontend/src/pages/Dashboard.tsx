@@ -1,6 +1,7 @@
 import MainLayout from '@/components/layout/MainLayout';
 import KPICard from '@/components/dashboard/KPICard';
 import FilterBar from '@/components/dashboard/FilterBar';
+import OrderPredictions from '@/components/predictions/OrderPredictions';
 import { useInventory } from '@/context/InventoryContext';
 import { Package, AlertTriangle, ClipboardList, Truck, ArrowRightLeft, TrendingUp } from 'lucide-react';
 import { useMemo } from 'react';
@@ -156,6 +157,14 @@ const Dashboard = () => {
               <span className="text-xs text-muted-foreground">1 day ago</span>
             </div>
           </div>
+        </div>
+
+        {/* Order Predictions */}
+        <div>
+          <h2 className="text-xl font-display font-semibold text-foreground mb-4">
+            Order Predictions
+          </h2>
+          <OrderPredictions />
         </div>
       </div>
     </MainLayout>

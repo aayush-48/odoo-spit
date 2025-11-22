@@ -5,16 +5,121 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useInventory } from '@/context/InventoryContext';
 import { Building2, MapPin, Plus, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 const Settings = () => {
-  const { warehouses } = useInventory();
+  const { warehouses, locations, addWarehouse, updateWarehouse, deleteWarehouse, addLocation, updateLocation, deleteLocation } = useInventory();
   const [selectedTab, setSelectedTab] = useState('stock');
   const [warehouseDialogOpen, setWarehouseDialogOpen] = useState(false);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [editingWarehouse, setEditingWarehouse] = useState<string | null>(null);
+  const [editingLocation, setEditingLocation] = useState<string | null>(null);
+  const [deleteWarehouseId, setDeleteWarehouseId] = useState<string | null>(null);
+  const [deleteLocationId, setDeleteLocationId] = useState<string | null>(null);
+  
+  const [warehouseForm, setWarehouseForm] = useState({
+    name: '',
+    code: '',
+    address: '',
+  });
+  
+  const [locationForm, setLocationForm] = useState({
+    name: '',
+    code: '',
+    warehouseId: '',
+    description: '',
+  });
+
+  const handleWarehouseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingWarehouse) {
+        updateWarehouse(editingWarehouse, warehouseForm);
+        toast.success('Warehouse updated successfully');
+      } else {
+        addWarehouse(warehouseForm);
+        toast.success('Warehouse created successfully');
+      }
+      setWarehouseDialogOpen(false);
+      setEditingWarehouse(null);
+      setWarehouseForm({ name: '', code: '', address: '' });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save warehouse');
+    }
+  };
+
+  const handleLocationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingLocation) {
+        updateLocation(editingLocation, locationForm);
+        toast.success('Location updated successfully');
+      } else {
+        addLocation(locationForm);
+        toast.success('Location created successfully');
+      }
+      setLocationDialogOpen(false);
+      setEditingLocation(null);
+      setLocationForm({ name: '', code: '', warehouseId: '', description: '' });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save location');
+    }
+  };
+
+  const handleEditWarehouse = (warehouse: typeof warehouses[0]) => {
+    setEditingWarehouse(warehouse.id);
+    setWarehouseForm({
+      name: warehouse.name,
+      code: warehouse.code,
+      address: warehouse.address,
+    });
+    setWarehouseDialogOpen(true);
+  };
+
+  const handleEditLocation = (location: typeof locations[0]) => {
+    setEditingLocation(location.id);
+    setLocationForm({
+      name: location.name,
+      code: location.code,
+      warehouseId: location.warehouseId,
+      description: location.description || '',
+    });
+    setLocationDialogOpen(true);
+  };
+
+  const handleDeleteWarehouse = () => {
+    if (deleteWarehouseId) {
+      try {
+        deleteWarehouse(deleteWarehouseId);
+        toast.success('Warehouse deleted successfully');
+        setDeleteWarehouseId(null);
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to delete warehouse');
+        setDeleteWarehouseId(null);
+      }
+    }
+  };
+
+  const handleDeleteLocation = () => {
+    if (deleteLocationId) {
+      try {
+        deleteLocation(deleteLocationId);
+        toast.success('Location deleted successfully');
+        setDeleteLocationId(null);
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to delete location');
+        setDeleteLocationId(null);
+      }
+    }
+  };
 
   return (
     <MainLayout>
@@ -137,7 +242,13 @@ const Settings = () => {
                       Manage warehouse details and locations
                     </CardDescription>
                   </div>
-                  <Dialog open={warehouseDialogOpen} onOpenChange={setWarehouseDialogOpen}>
+                  <Dialog open={warehouseDialogOpen} onOpenChange={(open) => {
+                    setWarehouseDialogOpen(open);
+                    if (!open) {
+                      setEditingWarehouse(null);
+                      setWarehouseForm({ name: '', code: '', address: '' });
+                    }
+                  }}>
                     <DialogTrigger asChild>
                       <Button className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2">
                         <Plus className="w-4 h-4" />
@@ -146,33 +257,65 @@ const Settings = () => {
                     </DialogTrigger>
                     <DialogContent className="bg-card">
                       <DialogHeader>
-                        <DialogTitle>Add New Warehouse</DialogTitle>
+                        <DialogTitle>{editingWarehouse ? 'Edit Warehouse' : 'Add New Warehouse'}</DialogTitle>
                         <DialogDescription>
-                          Create a new warehouse location
+                          {editingWarehouse ? 'Update warehouse details' : 'Create a new warehouse location'}
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="wh-name">Name</Label>
-                          <Input id="wh-name" placeholder="West Distribution Center" className="bg-background" />
+                      <form onSubmit={handleWarehouseSubmit}>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="wh-name">Name *</Label>
+                            <Input
+                              id="wh-name"
+                              placeholder="West Distribution Center"
+                              className="bg-background"
+                              value={warehouseForm.name}
+                              onChange={(e) => setWarehouseForm({ ...warehouseForm, name: e.target.value })}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="wh-code">Short Code *</Label>
+                            <Input
+                              id="wh-code"
+                              placeholder="WDC"
+                              className="bg-background font-mono"
+                              value={warehouseForm.code}
+                              onChange={(e) => setWarehouseForm({ ...warehouseForm, code: e.target.value.toUpperCase() })}
+                              required
+                              maxLength={10}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="wh-address">Address *</Label>
+                            <Input
+                              id="wh-address"
+                              placeholder="123 Warehouse St"
+                              className="bg-background"
+                              value={warehouseForm.address}
+                              onChange={(e) => setWarehouseForm({ ...warehouseForm, address: e.target.value })}
+                              required
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="wh-code">Short Code</Label>
-                          <Input id="wh-code" placeholder="WDC" className="bg-background" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="wh-address">Address</Label>
-                          <Input id="wh-address" placeholder="123 Warehouse St" className="bg-background" />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setWarehouseDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                          Create Warehouse
-                        </Button>
-                      </DialogFooter>
+                        <DialogFooter>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setWarehouseDialogOpen(false);
+                              setEditingWarehouse(null);
+                              setWarehouseForm({ name: '', code: '', address: '' });
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                            {editingWarehouse ? 'Update' : 'Create'} Warehouse
+                          </Button>
+                        </DialogFooter>
+                      </form>
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -205,10 +348,20 @@ const Settings = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="ghost" className="hover:bg-accent hover:text-accent-foreground">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => handleEditWarehouse(warehouse)}
+                            >
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" className="hover:bg-destructive hover:text-destructive-foreground">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => setDeleteWarehouseId(warehouse.id)}
+                            >
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -290,6 +443,51 @@ const Settings = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Delete Confirmation Dialogs */}
+        <AlertDialog open={!!deleteWarehouseId} onOpenChange={(open) => !open && setDeleteWarehouseId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this warehouse? This action cannot be undone.
+                {deleteWarehouseId && warehouses.find(w => w.id === deleteWarehouseId) && (
+                  <span className="block mt-2 font-semibold">
+                    Warehouse: {warehouses.find(w => w.id === deleteWarehouseId)?.name}
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteWarehouse} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={!!deleteLocationId} onOpenChange={(open) => !open && setDeleteLocationId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Location</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this location? This action cannot be undone.
+                {deleteLocationId && locations.find(l => l.id === deleteLocationId) && (
+                  <span className="block mt-2 font-semibold">
+                    Location: {locations.find(l => l.id === deleteLocationId)?.name}
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteLocation} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </MainLayout>
   );

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { User, LogOut, Settings, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import NotificationBell from '@/components/alerts/NotificationBell';
 
 const Header = () => {
   const { user, logout } = useInventory();
@@ -29,6 +30,7 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-4">
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2">

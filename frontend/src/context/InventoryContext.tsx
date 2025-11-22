@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Product, Warehouse, Receipt, Delivery, Transfer, Adjustment, Supplier, User, FilterState } from '@/types';
+import { Product, Warehouse, Receipt, Delivery, Transfer, Adjustment, Supplier, User, FilterState, Location } from '@/types';
 import { 
   initialProducts, 
   initialWarehouses, 
@@ -51,18 +51,33 @@ interface InventoryContextType {
   login: (loginId: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, name: string, loginId: string, role: 'inventory_manager' | 'warehouse_staff') => Promise<boolean>;
   logout: () => void;
+  generateOTP: (email: string) => Promise<string | null>;
+  verifyOTP: (email: string, otp: string) => Promise<boolean>;
+  resetPassword: (email: string, newPassword: string) => Promise<boolean>;
+  
+  // Warehouse actions
+  addWarehouse: (warehouse: Omit<Warehouse, 'id'>) => void;
+  updateWarehouse: (id: string, warehouse: Partial<Warehouse>) => void;
+  deleteWarehouse: (id: string) => void;
+  
+  // Location actions
+  locations: Location[];
+  addLocation: (location: Omit<Location, 'id'>) => void;
+  updateLocation: (id: string, location: Partial<Location>) => void;
+  deleteLocation: (id: string) => void;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
 
 export const InventoryProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [warehouses] = useState<Warehouse[]>(initialWarehouses);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>(initialWarehouses);
   const [receipts, setReceipts] = useState<Receipt[]>(initialReceipts);
   const [deliveries, setDeliveries] = useState<Delivery[]>(initialDeliveries);
   const [transfers, setTransfers] = useState<Transfer[]>(initialTransfers);
   const [adjustments, setAdjustments] = useState<Adjustment[]>(initialAdjustments);
   const [suppliers] = useState<Supplier[]>(initialSuppliers);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [user, setUser] = useState<User | null>(null);
   
   const [filters, setFilters] = useState<FilterState>({
@@ -306,8 +321,138 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  // OTP storage (in real app, this would be in backend/database)
+  const otpStore: Record<string, { code: string; expiresAt: number }> = {};
+
+  const generateOTP = async (email: string): Promise<string | null> => {
+    // Mock OTP generation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (!email) return null;
+    
+    // Generate 6-digit OTP
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+    
+    otpStore[email] = { code, expiresAt };
+    
+    // In production, send OTP via email/SMS
+    // For now, return code for testing
+    return code;
+  };
+
+  const verifyOTP = async (email: string, otp: string): Promise<boolean> => {
+    // Mock OTP verification
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const stored = otpStore[email];
+    if (!stored) return false;
+    
+    if (Date.now() > stored.expiresAt) {
+      delete otpStore[email];
+      return false;
+    }
+    
+    if (stored.code === otp) {
+      // Mark as verified (don't delete yet, needed for password reset)
+      return true;
+    }
+    
+    return false;
+  };
+
+  const resetPassword = async (email: string, newPassword: string): Promise<boolean> => {
+    // Mock password reset
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    if (!email || !newPassword) return false;
+    
+    // In production, update password in database
+    // For now, just clear OTP
+    delete otpStore[email];
+    
+    return true;
+  };
+
   const logout = () => {
     setUser(null);
+  };
+
+  // Warehouse actions
+  const addWarehouse = (warehouseData: Omit<Warehouse, 'id'>) => {
+    // Check for duplicate code
+    if (warehouses.some(w => w.code === warehouseData.code)) {
+      throw new Error('Warehouse code already exists');
+    }
+    
+    const newWarehouse: Warehouse = {
+      ...warehouseData,
+      id: generateId(),
+    };
+    setWarehouses([...warehouses, newWarehouse]);
+  };
+
+  const updateWarehouse = (id: string, warehouseData: Partial<Warehouse>) => {
+    // Check for duplicate code if code is being updated
+    if (warehouseData.code && warehouses.some(w => w.code === warehouseData.code && w.id !== id)) {
+      throw new Error('Warehouse code already exists');
+    }
+    
+    setWarehouses(warehouses.map(w => 
+      w.id === id ? { ...w, ...warehouseData } : w
+    ));
+  };
+
+  const deleteWarehouse = (id: string) => {
+    // Check if warehouse is used in any receipts, deliveries, or transfers
+    const isUsed = receipts.some(r => r.warehouseId === id) ||
+                   deliveries.some(d => d.warehouseId === id) ||
+                   transfers.some(t => t.fromWarehouseId === id || t.toWarehouseId === id);
+    
+    if (isUsed) {
+      throw new Error('Cannot delete warehouse that is in use');
+    }
+    
+    setWarehouses(warehouses.filter(w => w.id !== id));
+    // Also delete associated locations
+    setLocations(locations.filter(l => l.warehouseId !== id));
+  };
+
+  // Location actions
+  const addLocation = (locationData: Omit<Location, 'id'>) => {
+    // Check if warehouse exists
+    if (!warehouses.some(w => w.id === locationData.warehouseId)) {
+      throw new Error('Warehouse not found');
+    }
+    
+    // Check for duplicate code in same warehouse
+    if (locations.some(l => l.code === locationData.code && l.warehouseId === locationData.warehouseId)) {
+      throw new Error('Location code already exists in this warehouse');
+    }
+    
+    const newLocation: Location = {
+      ...locationData,
+      id: generateId(),
+    };
+    setLocations([...locations, newLocation]);
+  };
+
+  const updateLocation = (id: string, locationData: Partial<Location>) => {
+    // Check for duplicate code if code is being updated
+    if (locationData.code) {
+      const location = locations.find(l => l.id === id);
+      if (location && locations.some(l => l.code === locationData.code && l.warehouseId === (locationData.warehouseId || location.warehouseId) && l.id !== id)) {
+        throw new Error('Location code already exists in this warehouse');
+      }
+    }
+    
+    setLocations(locations.map(l => 
+      l.id === id ? { ...l, ...locationData } : l
+    ));
+  };
+
+  const deleteLocation = (id: string) => {
+    setLocations(locations.filter(l => l.id !== id));
   };
 
   const value: InventoryContextType = {
@@ -341,6 +486,16 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     login,
     signup,
     logout,
+    generateOTP,
+    verifyOTP,
+    resetPassword,
+    addWarehouse,
+    updateWarehouse,
+    deleteWarehouse,
+    locations,
+    addLocation,
+    updateLocation,
+    deleteLocation,
   };
 
   return (
