@@ -1,10 +1,12 @@
 import { useInventory } from '@/context/InventoryContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Transfer } from '@/types';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft, Download } from 'lucide-react';
+import { generatePDF } from '@/lib/pdfGenerator';
 
 interface TransferDetailsProps {
   transfer: Transfer | null;
@@ -52,13 +54,32 @@ const TransferDetails = ({ transfer, open, onClose }: TransferDetailsProps) => {
 
   const totalQuantity = transfer.lines.reduce((sum, line) => sum + line.quantity, 0);
 
+  const handleDownloadPDF = () => {
+    generatePDF({
+      transfer,
+      warehouses,
+      products,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-card max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-display flex items-center justify-between">
             <span>Transfer Details</span>
-            {getStatusBadge(transfer.status)}
+            <div className="flex items-center gap-2">
+              {getStatusBadge(transfer.status)}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDownloadPDF}
+                className="gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+              </Button>
+            </div>
           </DialogTitle>
           <DialogDescription>
             View detailed information about this transfer

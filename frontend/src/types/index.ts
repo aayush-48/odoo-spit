@@ -98,7 +98,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'manager' | 'staff';
+  loginId?: string;
+  role: 'inventory_manager' | 'warehouse_staff';
 }
 
 export interface KPI {

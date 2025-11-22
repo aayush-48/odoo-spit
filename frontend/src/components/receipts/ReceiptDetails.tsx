@@ -1,9 +1,12 @@
 import { useInventory } from '@/context/InventoryContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Receipt } from '@/types';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Download } from 'lucide-react';
+import { generatePDF } from '@/lib/pdfGenerator';
 
 interface ReceiptDetailsProps {
   receipt: Receipt | null;
@@ -55,13 +58,33 @@ const ReceiptDetails = ({ receipt, open, onClose }: ReceiptDetailsProps) => {
 
   const totalQuantity = receipt.lines.reduce((sum, line) => sum + line.quantity, 0);
 
+  const handleDownloadPDF = () => {
+    generatePDF({
+      receipt,
+      suppliers,
+      warehouses,
+      products,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-card max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-display flex items-center justify-between">
             <span>Receipt Details</span>
-            {getStatusBadge(receipt.status)}
+            <div className="flex items-center gap-2">
+              {getStatusBadge(receipt.status)}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDownloadPDF}
+                className="gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+              </Button>
+            </div>
           </DialogTitle>
           <DialogDescription>
             View detailed information about this receipt

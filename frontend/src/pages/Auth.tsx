@@ -4,9 +4,10 @@ import { useInventory } from '@/context/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Package, AlertCircle } from 'lucide-react';
+import { Package, AlertCircle, UserCog, Warehouse } from 'lucide-react';
 
 const Auth = () => {
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
@@ -15,6 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [role, setRole] = useState<'inventory_manager' | 'warehouse_staff'>('inventory_manager');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { login, signup } = useInventory();
@@ -22,6 +24,11 @@ const Auth = () => {
 
   const validateSignup = () => {
     const newErrors: Record<string, string> = {};
+    
+    // Name validation
+    if (!name || name.trim().length === 0) {
+      newErrors.name = 'Full name is required';
+    }
     
     // Login ID validation (unique, 6-12 chars)
     if (!loginId) {
@@ -86,7 +93,7 @@ const Auth = () => {
           return;
         }
         
-        success = await signup(email, password, name || loginId);
+        success = await signup(email, password, name.trim(), loginId, role);
         if (success) {
           toast.success('Account created successfully!');
           navigate('/dashboard');
@@ -176,6 +183,21 @@ const Auth = () => {
               {mode === 'signup' && (
                 <>
                   <div className="space-y-2">
+                    <Label htmlFor="name">Full Name *</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className={`bg-background ${errors.name ? 'border-destructive' : ''}`}
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-destructive">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="loginId">Login ID *</Label>
                     <Input
                       id="loginId"
@@ -233,6 +255,38 @@ const Auth = () => {
                     {errors.confirmPassword && (
                       <p className="text-xs text-destructive">{errors.confirmPassword}</p>
                     )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Role *</Label>
+                    <Select
+                      value={role}
+                      onValueChange={(value: 'inventory_manager' | 'warehouse_staff') => setRole(value)}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        <SelectItem value="inventory_manager">
+                          <div className="flex items-center gap-2">
+                            <UserCog className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">Inventory Manager</div>
+                              <div className="text-xs text-muted-foreground">Manage incoming & outgoing stock</div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="warehouse_staff">
+                          <div className="flex items-center gap-2">
+                            <Warehouse className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">Warehouse Staff</div>
+                              <div className="text-xs text-muted-foreground">Perform transfers, picking, shelving, and counting</div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </>
               )}

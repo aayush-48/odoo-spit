@@ -13,9 +13,13 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useInventory } from '@/context/InventoryContext';
 
 const Sidebar = () => {
   const [operationsOpen, setOperationsOpen] = useState(true);
+  const { user } = useInventory();
+  const isInventoryManager = user?.role === 'inventory_manager';
+  const isWarehouseStaff = user?.role === 'warehouse_staff';
 
   return (
     <aside className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col h-screen sticky top-0">
@@ -66,28 +70,35 @@ const Sidebar = () => {
             
             {operationsOpen && (
               <ul className="mt-1 space-y-1">
-                <li>
-                  <NavLink
-                    to="/receipts"
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
-                    activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  >
-                    <ClipboardList className="w-5 h-5" />
-                    Receipts
-                  </NavLink>
-                </li>
+                {/* Receipts - Inventory Managers only */}
+                {isInventoryManager && (
+                  <li>
+                    <NavLink
+                      to="/receipts"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    >
+                      <ClipboardList className="w-5 h-5" />
+                      Receipts
+                    </NavLink>
+                  </li>
+                )}
                 
-                <li>
-                  <NavLink
-                    to="/deliveries"
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
-                    activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  >
-                    <Truck className="w-5 h-5" />
-                    Deliveries
-                  </NavLink>
-                </li>
+                {/* Deliveries - Inventory Managers only */}
+                {isInventoryManager && (
+                  <li>
+                    <NavLink
+                      to="/deliveries"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    >
+                      <Truck className="w-5 h-5" />
+                      Deliveries
+                    </NavLink>
+                  </li>
+                )}
                 
+                {/* Transfers - Both roles */}
                 <li>
                   <NavLink
                     to="/transfers"
@@ -99,17 +110,21 @@ const Sidebar = () => {
                   </NavLink>
                 </li>
                 
-                <li>
-                  <NavLink
-                    to="/adjustments"
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
-                    activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  >
-                    <TrendingUp className="w-5 h-5" />
-                    Adjustments
-                  </NavLink>
-                </li>
+                {/* Adjustments - Warehouse Staff only */}
+                {isWarehouseStaff && (
+                  <li>
+                    <NavLink
+                      to="/adjustments"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors pl-8"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    >
+                      <TrendingUp className="w-5 h-5" />
+                      Adjustments
+                    </NavLink>
+                  </li>
+                )}
                 
+                {/* Route Optimization - Both roles */}
                 <li>
                   <NavLink
                     to="/optimization"
@@ -121,6 +136,7 @@ const Sidebar = () => {
                   </NavLink>
                 </li>
                 
+                {/* Move History - Both roles */}
                 <li>
                   <NavLink
                     to="/history"

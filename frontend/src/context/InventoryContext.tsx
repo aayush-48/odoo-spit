@@ -48,8 +48,8 @@ interface InventoryContextType {
   updateAdjustment: (id: string, adjustment: Partial<Adjustment>) => void;
   confirmAdjustment: (id: string) => void;
   
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  login: (loginId: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, name: string, loginId: string, role: 'inventory_manager' | 'warehouse_staff') => Promise<boolean>;
   logout: () => void;
 }
 
@@ -267,32 +267,39 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Auth actions
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (loginId: string, password: string): Promise<boolean> => {
     // Mock authentication
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    if (email && password) {
+    if (loginId && password) {
+      // Mock: different users based on loginId
+      const role = loginId.toLowerCase().includes('manager') || loginId.toLowerCase().includes('mgr') 
+        ? 'inventory_manager' 
+        : 'warehouse_staff';
+      
       setUser({
         id: generateId(),
-        email,
-        name: email.split('@')[0],
-        role: 'manager',
+        email: `${loginId}@company.com`,
+        name: loginId,
+        loginId,
+        role,
       });
       return true;
     }
     return false;
   };
 
-  const signup = async (email: string, password: string, name: string): Promise<boolean> => {
+  const signup = async (email: string, password: string, name: string, loginId: string, role: 'inventory_manager' | 'warehouse_staff'): Promise<boolean> => {
     // Mock signup
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    if (email && password && name) {
+    if (email && password && name && loginId) {
       setUser({
         id: generateId(),
         email,
         name,
-        role: 'manager',
+        loginId,
+        role,
       });
       return true;
     }

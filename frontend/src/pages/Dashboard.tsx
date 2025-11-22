@@ -2,11 +2,13 @@ import MainLayout from '@/components/layout/MainLayout';
 import KPICard from '@/components/dashboard/KPICard';
 import FilterBar from '@/components/dashboard/FilterBar';
 import { useInventory } from '@/context/InventoryContext';
-import { Package, AlertTriangle, ClipboardList, Truck, ArrowRightLeft } from 'lucide-react';
+import { Package, AlertTriangle, ClipboardList, Truck, ArrowRightLeft, TrendingUp } from 'lucide-react';
 import { useMemo } from 'react';
 
 const Dashboard = () => {
-  const { products, receipts, deliveries, transfers } = useInventory();
+  const { products, receipts, deliveries, transfers, adjustments, user } = useInventory();
+  const isInventoryManager = user?.role === 'inventory_manager';
+  const isWarehouseStaff = user?.role === 'warehouse_staff';
 
   const kpis = useMemo(() => {
     const totalStock = products.reduce((sum, p) => {
@@ -21,6 +23,7 @@ const Dashboard = () => {
     const pendingReceipts = receipts.filter(r => r.status !== 'done' && r.status !== 'canceled').length;
     const pendingDeliveries = deliveries.filter(d => d.status !== 'done' && d.status !== 'canceled').length;
     const scheduledTransfers = transfers.filter(t => t.status !== 'done' && t.status !== 'canceled').length;
+    const pendingAdjustments = adjustments.filter(a => a.status !== 'done' && a.status !== 'canceled').length;
 
     return {
       totalStock,
@@ -28,8 +31,9 @@ const Dashboard = () => {
       pendingReceipts,
       pendingDeliveries,
       scheduledTransfers,
+      pendingAdjustments,
     };
-  }, [products, receipts, deliveries, transfers]);
+  }, [products, receipts, deliveries, transfers, adjustments]);
 
   return (
     <MainLayout>
@@ -60,21 +64,25 @@ const Dashboard = () => {
             trend={kpis.lowStockItems > 0 ? 'up' : 'neutral'}
             change={kpis.lowStockItems > 0 ? 8 : 0}
           />
-          <KPICard
-            label="Pending Receipts"
-            value={kpis.pendingReceipts}
-            icon={ClipboardList}
-            trend="neutral"
-            variant="default"
-          />
-          <KPICard
-            label="Pending Deliveries"
-            value={kpis.pendingDeliveries}
-            icon={Truck}
-            trend="down"
-            change={5}
-            variant="default"
-          />
+          {isInventoryManager && (
+            <>
+              <KPICard
+                label="Pending Receipts"
+                value={kpis.pendingReceipts}
+                icon={ClipboardList}
+                trend="neutral"
+                variant="default"
+              />
+              <KPICard
+                label="Pending Deliveries"
+                value={kpis.pendingDeliveries}
+                icon={Truck}
+                trend="down"
+                change={5}
+                variant="default"
+              />
+            </>
+          )}
           <KPICard
             label="Scheduled Transfers"
             value={kpis.scheduledTransfers}
@@ -82,6 +90,15 @@ const Dashboard = () => {
             trend="neutral"
             variant="default"
           />
+          {isWarehouseStaff && (
+            <KPICard
+              label="Pending Adjustments"
+              value={kpis.pendingAdjustments}
+              icon={TrendingUp}
+              trend="neutral"
+              variant="default"
+            />
+          )}
         </div>
 
         <div>
